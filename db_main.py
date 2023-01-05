@@ -26,4 +26,4 @@ def bd_connect(host,user,password,database):
             connection.close()
             print("[INFO] PostgreSQL connection closed")
 
-# bd_connect("localhost","root","123Qwerty123","Test_bd")
+# bd_connect("localhost","root","123Qwerty123","Test_bd")  
