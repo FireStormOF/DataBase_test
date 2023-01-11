@@ -28,6 +28,7 @@ except Exception as _ex:
 
 # bd_connect("localhost","root","123Qwerty123","Test_bd")  
 
+
 # registration of user
 
 # tel = str(input("enter tel...  "))
@@ -38,29 +39,56 @@ lastname = str(input("enter lastname...  "))
 def registration(name,lastname):
     try:
         mycursor = connection.cursor()
-        val_1 =(name,lastname) 
-        
-        valid = 'SELECT name,lastname \t FROM \t ( \t SELECT valid_user.name, valid_user.lastname \t FROM valid_user \t UNION ALL \t SELECT reg_user.name, reg_user.lastname  \t FROM reg_user) t \t GROUP BY name, lastname \t HAVING COUNT(*) = 1  \t ORDER BY name'
+
+        mycursor = connection.cursor()
+        sql = "INSERT INTO reg_user (name, lastname) VALUES (%s, %s)"
+        val = (name,lastname)  
+        mycursor.execute(sql, val)
+        connection.commit()
+        print(mycursor.rowcount, "Дані внесено")
+
+        invalid = """ select name, lastname
+       from (
+         select name, lastname
+         from reg_user
+         union all
+         select name, lastname
+         from valid_user)
+       temp
+       group by name, lastname 
+       having count(*) = 1; """
+
+        valid = """ select name, lastname
+       from (
+         select name, lastname
+         from reg_user
+         union all
+         select name, lastname
+         from valid_user)
+       temp
+       group by name, lastname 
+       having count(*) = 0; """
 
 
-        invalid = 'SELECT name,lastname \t FROM \t ( \t SELECT valid_user.name, valid_user.lastname \t FROM valid_user \t UNION ALL \t SELECT reg_user.name, reg_user.lastname  \t FROM reg_user) t \t GROUP BY name, lastname \t HAVING COUNT(*) > 1  \t ORDER BY name'
-         
 
-        # mycursor.execute(invalid,val_1)
-        # mycursor.execute(valid,val_1)
-        
-        if( mycursor.execute(invalid,val_1)):
-            print("Ви вже зареєстровані в системі, не треба нас дурити <3 ")
-        elif(  mycursor.execute(valid,val_1)):
-            mycursor = connection.cursor()
+
+
+
+        print( mycursor.execute(invalid) )
+        print("---------------")
+        print( mycursor.execute(valid) )
+
+        if( mycursor.execute(invalid) > 1 ):
             sql = "INSERT INTO reg_user (name, lastname) VALUES (%s, %s)"
-            val = (name,lastname)
+            val = (name,lastname)  
             mycursor.execute(sql, val)
             connection.commit()
-            print(mycursor.rowcount, "Дані внесено")
+            print(mycursor.rowcount, "Дані Видалено")
+        elif( mycursor.execute(valid) == 1 ):
+            print(" You registred )))) ")
         
     except Exception as e:
-        print("Я даун")
+        print("Я стаю менш дауном")
             
 
 
