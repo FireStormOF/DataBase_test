@@ -30,27 +30,44 @@ except Exception as _ex:
 
 # registration of user
 
-tel = str(input("enter tel...  "))
+# tel = str(input("enter tel...  "))
 name = str(input("enter name...  "))
 lastname = str(input("enter lastname...  "))
-l_lastname = str(input("enter l_lastname...  "))
+# l_lastname = str(input("enter l_lastname...  "))
 
-def registration(tel,name,lastname,l_lastname):
+def registration(name,lastname):
     try:
         mycursor = connection.cursor()
-        sql = "INSERT INTO reg_user (tel, name, lastname, l_lastname) VALUES (%s, %s, %s, %s)"
-        val = (tel, name,lastname, l_lastname)
-        mycursor.execute(sql, val)
-        connection.commit()
-        print(mycursor.rowcount, "Дані внесено")
-    except:
-        pass    
+        val_1 =(name,lastname) 
+        
+        valid = 'SELECT name,lastname \t FROM \t ( \t SELECT valid_user.name, valid_user.lastname \t FROM valid_user \t UNION ALL \t SELECT reg_user.name, reg_user.lastname  \t FROM reg_user) t \t GROUP BY name, lastname \t HAVING COUNT(*) = 1  \t ORDER BY name'
+
+
+        invalid = 'SELECT name,lastname \t FROM \t ( \t SELECT valid_user.name, valid_user.lastname \t FROM valid_user \t UNION ALL \t SELECT reg_user.name, reg_user.lastname  \t FROM reg_user) t \t GROUP BY name, lastname \t HAVING COUNT(*) > 1  \t ORDER BY name'
+         
+
+        # mycursor.execute(invalid,val_1)
+        # mycursor.execute(valid,val_1)
+        
+        if( mycursor.execute(invalid,val_1)):
+            print("Ви вже зареєстровані в системі, не треба нас дурити <3 ")
+        elif(  mycursor.execute(valid,val_1)):
+            mycursor = connection.cursor()
+            sql = "INSERT INTO reg_user (name, lastname) VALUES (%s, %s)"
+            val = (name,lastname)
+            mycursor.execute(sql, val)
+            connection.commit()
+            print(mycursor.rowcount, "Дані внесено")
+        
+    except Exception as e:
+        print("Я даун")
+            
 
 
 
 
 
-registration(tel,name,lastname,l_lastname)
+registration(name,lastname)
 
 
 
