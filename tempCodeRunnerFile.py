@@ -1,1 +1,1 @@
-print(mycursor.execute(invalid))
+ou regis

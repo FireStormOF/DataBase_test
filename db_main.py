@@ -1,8 +1,7 @@
 import pymysql
 
-# def bd_connect(host,user,password,database):
 try:
-        # connect to exist database
+
         connection = pymysql.connect(
             host='localhost',
             user="root",
@@ -20,87 +19,70 @@ try:
             
 except Exception as _ex:
         print("[INFO] Error while working with PostgreSQL", _ex)
-# finally:
-#         if connection:
-#             # cursor.close()
-#             connection.close()
-#             print("[INFO] PostgreSQL connection closed")
-
-# bd_connect("localhost","root","123Qwerty123","Test_bd")  
 
 
+
+#//////////////////////////////////////////////////////////
 # registration of user
 
-# tel = str(input("enter tel...  "))
-name = str(input("enter name...  "))
-lastname = str(input("enter lastname...  "))
-# l_lastname = str(input("enter l_lastname...  "))
+tel = str(input("enter tel --->  "))
+name = str(input("enter name --->  "))
+lastname = str(input("enter lastname --->  "))
+l_lastname = str(input("enter l_lastname --->  "))
 
-def registration(name,lastname):
+
+def registration(tel,name,lastname,l_lastname):
     try:
         mycursor = connection.cursor()
-
-        mycursor = connection.cursor()
-        sql = "INSERT INTO reg_user (name, lastname) VALUES (%s, %s)"
-        val = (name,lastname)  
+        sql = "INSERT INTO reg_user (tel, name, lastname,l_lastname) VALUES (%s, %s, %s, %s)"
+        val = (tel,name,lastname,l_lastname)  
         mycursor.execute(sql, val)
         connection.commit()
         print(mycursor.rowcount, "Дані внесено")
 
-        invalid = """ select name, lastname
-       from (
-         select name, lastname
-         from reg_user
-         union all
-         select name, lastname
-         from valid_user)
-       temp
-       group by name, lastname 
-       having count(*) = 1; """
+        reg = """
+    
+SELECT name,lastname,l_lastname FROM reg_user 
+EXCEPT
+SELECT name,lastname,l_lastname FROM valid_user
 
-        valid = """ select name, lastname
-       from (
-         select name, lastname
-         from reg_user
-         union all
-         select name, lastname
-         from valid_user)
-       temp
-       group by name, lastname 
-       having count(*) = 0; """
+    """ 
+        reg_matched = """
+SELECT name, COUNT(name)
+FROM reg_user
+GROUP BY name
+HAVING COUNT(name) > 1
 
+        """
+ 
+        print(mycursor.execute(reg))
+        print(mycursor.execute(reg_matched))
 
-
-
-
-
-        print( mycursor.execute(invalid) )
-        print("---------------")
-        print( mycursor.execute(valid) )
-
-        if( mycursor.execute(invalid) > 1 ):
-            sql = "INSERT INTO reg_user (name, lastname) VALUES (%s, %s)"
-            val = (name,lastname)  
-            mycursor.execute(sql, val)
+        if( mycursor.execute(reg) > 0):
+            sql ="""delete from reg_user
+                    order by user_id desc limit 1"""
+            # val = (tel,name,lastname,l_lastname)
+            mycursor.execute(sql)
             connection.commit()
-            print(mycursor.rowcount, "Дані Видалено")
-        elif( mycursor.execute(valid) == 1 ):
-            print(" You registred )))) ")
+            print(mycursor.rowcount, " Дані Видалено ")
+            print(" Registration error ")
+        elif(mycursor.execute(reg_matched)== 1):
+            sql ="""delete from reg_user
+                    order by user_id desc limit 1"""
+            # val = (tel,name,lastname,l_lastname)
+            mycursor.execute(sql)
+            connection.commit()
+            print(mycursor.rowcount, " Дані Видалено ")
+            print(" Registration error ")
+        elif(mycursor.execute(reg) == 0):
+            print(" You registred ")
+
+
+        
         
     except Exception as e:
-        print("Я стаю менш дауном")
+        print("troubles with mySQL code !!!!")
             
+registration(tel,name,lastname,l_lastname)
 
-
-
-
-
-registration(name,lastname)
-
-
-
-
-# validation of user
-
-
-# add to main
+#///////////////////////////////////////////////
